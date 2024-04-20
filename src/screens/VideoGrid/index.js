@@ -21,7 +21,7 @@ const VideoGrid = ({navigation}) => {
   };
 
   // Render item for FlatList
-  const renderSongItem = ({item}) => (
+  const renderSongItem = ({item, index}) => (
     <TouchableOpacity
       style={styles.songItemContainer}
       onPress={() => handlePlay(item.videoUrl, item.thumbnailUrl, item)}>
@@ -32,7 +32,7 @@ const VideoGrid = ({navigation}) => {
         <View style={styles.overlay} />
         <Text style={styles.title}>{item.title}</Text>
         <View style={{position: 'absolute', top: -10, left: 0}}>
-          <Text style={styles.numberStyle}>{item.id}</Text>
+          <Text style={styles.numberStyle}>{index + 1}</Text>
         </View>
       </ImageBackground>
     </TouchableOpacity>

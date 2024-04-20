@@ -9,9 +9,8 @@ export default StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    width: 35,
-    height: 35,
-    borderRadius: 35 / 2,
+    width: 30,
+    height: 30,
+    borderRadius: 20,
   },
 });

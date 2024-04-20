@@ -1,5 +1,5 @@
 // VideoPlayer.js
-import React, {useRef, useState} from 'react';
+import React, {useLayoutEffect, useRef, useState} from 'react';
 import {View, Text, StyleSheet, Image, TouchableOpacity} from 'react-native';
 
 import Video from 'react-native-video';
@@ -7,7 +7,12 @@ import Slider from '@react-native-community/slider';
 import LinearGradient from 'react-native-linear-gradient';
 
 import {toHHMMSS} from '../../constants';
-import CircularProgressBar from '../../components/CircularProgressBar';
+import DownloadModal from '../../components/DownloadModal';
+import {
+  fetchDownloadedDataFromLocalDir,
+  sendDownloadedDataToLocalDir,
+} from '../../services/downloadService';
+import Toast from 'react-native-toast-message';
 
 const AudioPlayer = ({route, navigation}) => {
   const videoRef = useRef(null);
@@ -16,6 +21,8 @@ const AudioPlayer = ({route, navigation}) => {
   const [isPaused, setIsPaused] = useState(false);
   const [sliderValue, setSliderValue] = useState(0);
   const [totalVideoDuration, setTotalVideoDuration] = useState(0);
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [isAlreadyDownload, setAlreadyDownload] = useState(false);
 
   const src = route?.params?.source;
   const posterImage = route?.params?.posterImage;
@@ -23,6 +30,22 @@ const AudioPlayer = ({route, navigation}) => {
   const data = route?.params?.data;
   const artistName = data?.artist ? data?.artist : data?.author;
   const songName = data?.title;
+
+  useLayoutEffect(() => {
+    fetchDownloadedDataFromLocalDir(item => {
+      if (item?.length > 0) {
+        item.find(obj => {
+          if (obj?.contentId === data.id) {
+            setTimeout(() => {
+              setAlreadyDownload(true);
+            }, 100);
+          }
+        });
+      } else {
+        setAlreadyDownload(false);
+      }
+    });
+  }, []);
 
   const onSliderValueChange = value => {
     videoRef.current.seek(value);
@@ -48,6 +71,28 @@ const AudioPlayer = ({route, navigation}) => {
 
   const togglePlay = () => {
     setIsPaused(!isPaused);
+  };
+
+  const onDownloadPress = () => {
+    setIsPaused(true);
+    setModalVisible(true);
+
+    sendDownloadedDataToLocalDir(
+      callback => {},
+      data.id,
+      src,
+      artistName,
+      songName,
+      posterImage,
+    );
+  };
+
+  const onAlreadyDownloadPress = () => {
+    showToast(
+      'success',
+      'Already downloaded',
+      'This content is already downloaded 👋',
+    );
   };
 
   return (
@@ -91,11 +136,22 @@ const AudioPlayer = ({route, navigation}) => {
       </View>
 
       <View style={styles.wrapper}>
-        {/* <Image
-          style={[styles.suffelIcon, {marginRight: 20}]}
-          source={require('../../icons/downloadIcon.png')}
-        /> */}
-        <CircularProgressBar />
+        {isAlreadyDownload ? (
+          <TouchableOpacity onPress={onAlreadyDownloadPress}>
+            <Image
+              style={[styles.suffelIcon, {marginRight: 20}]}
+              source={require('../../icons/downloaded.png')}
+            />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={onDownloadPress}>
+            <Image
+              style={[styles.suffelIcon, {marginRight: 20}]}
+              source={require('../../icons/downloadIcon.png')}
+            />
+          </TouchableOpacity>
+        )}
+
         <Image
           style={[styles.suffelIcon, {}]}
           source={require('../../icons/likeAlt.png')}
@@ -135,6 +191,16 @@ const AudioPlayer = ({route, navigation}) => {
       <BackWardComponent />
       <RepeatComponent />
       <SuffelComponent />
+      <DownloadModal
+        isModalVisible={isModalVisible}
+        onClosePress={() => setModalVisible(false)}
+        contentId={data.id}
+        onDownloadFinished={item => {
+          if (item) {
+            setAlreadyDownload(true);
+          }
+        }}
+      />
     </>
   );
 };
@@ -312,4 +378,17 @@ const SuffelComponent = () => {
       />
     </TouchableOpacity>
   );
+};
+
+export const showToast = (type, text1, text2) => {
+  Toast.show({
+    type: type,
+    text1: text1,
+    text2: text2,
+
+    position: 'top',
+    topOffset: 50,
+    visibilityTime: 4000,
+    autoHide: true,
+  });
 };
