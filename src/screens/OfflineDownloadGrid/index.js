@@ -62,6 +62,7 @@ const OfflineDownloadGrid = ({navigation}) => {
       source: url,
       posterImage: thumbnail,
       data: item,
+      offline: true
     });
   };
 

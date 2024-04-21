@@ -1,6 +1,13 @@
 // VideoPlayer.js
 import React, {useLayoutEffect, useRef, useState} from 'react';
-import {View, Text, StyleSheet, Image, TouchableOpacity, Platform} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Platform,
+} from 'react-native';
 
 import Video from 'react-native-video';
 import Slider from '@react-native-community/slider';
@@ -30,6 +37,8 @@ const AudioPlayer = ({route, navigation}) => {
   const data = route?.params?.data;
   const artistName = data?.artist ? data?.artist : data?.author;
   const songName = data?.title;
+  const offlineMode = route?.params?.offline;
+  const isFromAudio = data?.isAudio;
 
   useLayoutEffect(() => {
     fetchDownloadedDataFromLocalDir(item => {
@@ -84,7 +93,7 @@ const AudioPlayer = ({route, navigation}) => {
       artistName,
       songName,
       posterImage,
-      isAudio
+      isAudio,
     );
   };
 
@@ -112,7 +121,7 @@ const AudioPlayer = ({route, navigation}) => {
         ignoreSilentSwitch={'ignore'}
         playWhenInactive={true}
         playInBackground={true}
-        poster={isAudio ? posterImage : null}
+        poster={isAudio || isFromAudio ? posterImage : null}
         posterResizeMode="cover"
       />
       <LinearGradient
@@ -144,7 +153,7 @@ const AudioPlayer = ({route, navigation}) => {
               source={require('../../icons/downloaded.png')}
             />
           </TouchableOpacity>
-        ) : (
+        ) : offlineMode ? null : (
           <TouchableOpacity onPress={onDownloadPress}>
             <Image
               style={[styles.suffelIcon, {marginRight: 20}]}

@@ -68,6 +68,7 @@ export const sendDownloadedDataToLocalDir = async (
       songName: songName,
       downloadDate: new Date(),
       posterImage: posterImage,
+      isAudio: isAudio
     };
 
     let offlinDonwloadList = [];
