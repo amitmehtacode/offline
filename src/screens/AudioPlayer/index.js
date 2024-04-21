@@ -1,6 +1,6 @@
 // VideoPlayer.js
 import React, {useLayoutEffect, useRef, useState} from 'react';
-import {View, Text, StyleSheet, Image, TouchableOpacity} from 'react-native';
+import {View, Text, StyleSheet, Image, TouchableOpacity, Platform} from 'react-native';
 
 import Video from 'react-native-video';
 import Slider from '@react-native-community/slider';
@@ -218,10 +218,10 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   slider: {
-    width: '90%',
+    width: Platform.OS === 'ios' ? '90%' : '100%',
     alignSelf: 'center',
     position: 'absolute',
-    bottom: 160,
+    bottom: Platform.OS === 'ios' ? 160 : 170,
   },
   controls: {
     flexDirection: 'row',
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     alignItems: 'flex-end',
-    paddingTop: 60,
+    paddingTop: Platform.OS === 'ios' ? 60 : 20,
     paddingHorizontal: 20,
     borderWidth: 0,
   },

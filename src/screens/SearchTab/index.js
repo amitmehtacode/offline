@@ -1,18 +1,17 @@
-import {StyleSheet, Text, TextInput, View, Image} from 'react-native';
+import {StyleSheet, Text, TextInput, View, Image, Platform} from 'react-native';
 import React, {useState} from 'react';
 
 const SearchTab = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const handleSearch = query => {
-    // Handle search action here
     setSearchQuery(query);
   };
   return (
     <View style={styles.wrapper}>
-      <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+      <View style={styles.containerAlt}>
         <Text style={styles.heading}>Search</Text>
         <Image
-          style={{width: 30, height: 30}}
+          style={styles.image}
           source={require('../../icons/camera.png')}
         />
       </View>
@@ -42,13 +41,19 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
   },
+  containerAlt: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: Platform.OS === 'android' ? 20 : null,
+  },
   container: {
     backgroundColor: '#fff',
     borderRadius: 4,
     paddingHorizontal: 10,
-    paddingVertical: 10,
+    paddingVertical: Platform.OS === 'ios' ? 10 : null,
   },
   input: {
     fontSize: 14,
   },
+  image: {width: 30, height: 30},
 });

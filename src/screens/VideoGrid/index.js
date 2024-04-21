@@ -11,7 +11,6 @@ import {VIDEO_DATA} from '../../data';
 
 const VideoGrid = ({navigation}) => {
   const handlePlay = (url, thumbnail, item) => {
-    // Handle play action here
     console.log(`Playing song with ID ${navigation}`);
     navigation.navigate('PlayerScreen', {
       source: url,
@@ -20,7 +19,6 @@ const VideoGrid = ({navigation}) => {
     });
   };
 
-  // Render item for FlatList
   const renderSongItem = ({item, index}) => (
     <TouchableOpacity
       style={styles.songItemContainer}
@@ -31,7 +29,7 @@ const VideoGrid = ({navigation}) => {
         style={styles.songItem}>
         <View style={styles.overlay} />
         <Text style={styles.title}>{item.title}</Text>
-        <View style={{position: 'absolute', top: -10, left: 0}}>
+        <View style={styles.box}>
           <Text style={styles.numberStyle}>{index + 1}</Text>
         </View>
       </ImageBackground>
@@ -108,4 +106,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
+  box: {position: 'absolute', top: -10, left: 0}
 });
