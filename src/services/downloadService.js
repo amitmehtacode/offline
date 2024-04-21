@@ -4,25 +4,6 @@ import RNFetchBlob from 'rn-fetch-blob';
 
 export const sendDownloadedDataToLocalDir = async (
   callback = () => {},
-  //   coverImageUrl,
-  //   category,
-  //   title,
-  //   userUniqueId,
-  //   badgeText,
-  //   language,
-  //   duration,
-  //   description,
-  //   teacherName,
-  //   ownerAvatarImageUrl,
-  //   offlineUrl,
-  //   widePosterImageUrl,
-  //   //   contentId,
-  //   contentType,
-  //   teacherId,
-  //   userMusicProperty,
-  //   musicType,
-  //   trackTitle,
-  //   trackDuration,
 
   contentId,
   src,
@@ -80,43 +61,7 @@ export const sendDownloadedDataToLocalDir = async (
       }
     } catch (e) {}
 
-    // for owner Image
-    // const imageConvert = ownerAvatarImageUrl && changeImageFormat(ownerAvatarImageUrl);
-
-    // if (ownerAvatarImageUrl) {
-    //   try {
-    //     let res = await RNFetchBlob.config({
-    //       fileCache: true,
-    //       path: `${dirToSave}/${contentId}.jpg`,
-    //     }).fetch('GET', imageConvert, {});
-    //     if (res) {
-    //       ownerUrl = res.path();
-    //     }
-    //   } catch (e) {}
-    // }
-
     var offlineObjData = {
-      //   userId: userUniqueId,
-      //   id: contentId,
-      //   title: title,
-      //   duration: duration,
-      //   longDescription: description,
-      //   teacher: teacherName,
-      //   contentType: contentType,
-      //   trackDuration: trackDuration,
-      //   playUrl: offlineMusicPlayerUrl,
-      //   posterImage: imageUrl,
-      //   ownerAvatarImageUrl: ownerUrl,
-      //   trackTitle: trackTitle,
-      //   teacherId: teacherId,
-      //   userMusicProperty: userMusicProperty,
-      //   musicType: musicType,
-      //   downloadDate: new Date(),
-      //   category: category,
-      //   badgeText: badgeText,
-      //   language: language,
-      //   imageUrl: coverImageUrl,
-
       contentId: contentId,
       source: offlineMusicPlayerUrl,
       artistName: artistName,
@@ -215,9 +160,7 @@ export const fetchDownloadedDataFromLocalDir = async (sendData = () => {}) => {
   await RNFetchBlob.fs
     .ls(trackFolder)
     .then(files => {})
-    .catch(err => {
-      // console.log('err----->>>>', err)
-    });
+    .catch(err => {});
   try {
     let localDownloads = await RNFetchBlob.fs.readFile(MyPath, 'utf8');
     localDownloads = JSON.parse(localDownloads);
@@ -246,35 +189,15 @@ export const deleteContentFromLocalDir = async downloadedId => {
     }
   });
   jsonObj.splice(flag, 1);
-  // newArrObj = jsonObj;
-  // jsonObj = jsonObj?.filter((item) => item.id === downloadedId && item?.musicType === MUSIC_TYPE_BOTH && item?.userMusicProperty === musicProperty);
-
   await RNFetchBlob.fs
     .writeFile(MyPath, JSON.stringify(jsonObj), 'utf8')
     .then(r => {})
     .catch(e => {});
 };
 
-export const deleteAllDownloadDataFromLocal = async userId => {
-  // if userID doesn't exist.
-  if (!userId) {
-    return;
-  }
-
+export const deleteAllDownloadDataFromLocal = async () => {
   let jsonObj = [];
   const MyPath = RNFetchBlob.fs.dirs.CacheDir + `/.file.json`;
-
-  try {
-    let localDownloads = await RNFetchBlob.fs.readFile(MyPath, 'utf8');
-    localDownloads = JSON.parse(localDownloads);
-    if (Array.isArray(localDownloads)) {
-      jsonObj = localDownloads;
-    }
-  } catch (e) {}
-
-  //delete all operation
-  jsonObj = jsonObj?.filter(item => item.userId !== userId);
-
   await RNFetchBlob.fs
     .writeFile(MyPath, JSON.stringify(jsonObj), 'utf8')
     .then(r => {})

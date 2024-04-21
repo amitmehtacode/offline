@@ -1,4 +1,4 @@
-import {StyleSheet, Text, TextInput, View} from 'react-native';
+import {StyleSheet, Text, TextInput, View, Image} from 'react-native';
 import React, {useState} from 'react';
 
 const SearchTab = () => {
@@ -9,7 +9,13 @@ const SearchTab = () => {
   };
   return (
     <View style={styles.wrapper}>
-      <Text style={styles.heading}>Search</Text>
+      <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+        <Text style={styles.heading}>Search</Text>
+        <Image
+          style={{width: 30, height: 30}}
+          source={require('../../icons/camera.png')}
+        />
+      </View>
       <View style={styles.container}>
         <TextInput
           style={styles.input}
@@ -28,7 +34,7 @@ export default SearchTab;
 const styles = StyleSheet.create({
   wrapper: {
     marginHorizontal: 10,
-    marginBottom: 40
+    marginBottom: 40,
   },
   heading: {
     color: '#fff',

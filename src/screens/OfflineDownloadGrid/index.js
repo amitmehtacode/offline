@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {
+  deleteAllDownloadDataFromLocal,
   deleteContentFromLocalDir,
   fetchDownloadedDataFromLocalDir,
 } from '../../services/downloadService';
@@ -20,6 +21,7 @@ const OfflineDownloadGrid = ({navigation}) => {
   const [data, setData] = useState([]);
   const [reRender, setReRender] = useState(false);
   const [isDeletionModalVisible, setDeletionModalVisible] = useState(false);
+  const [isSelectedPress, setSelectedPress] = useState(false);
 
   const isFocused = useIsFocused();
 
@@ -38,6 +40,10 @@ const OfflineDownloadGrid = ({navigation}) => {
   useEffect(() => {
     fetchDownloadedData();
   }, [reRender, isFocused]);
+
+  useEffect(() => {
+    setSelectedPress(true);
+  }, [isFocused]);
 
   useEffect(() => {
     const downloadListenerStatus = DeviceEventEmitter.addListener(
@@ -68,6 +74,15 @@ const OfflineDownloadGrid = ({navigation}) => {
     fetchDownloadedData();
   };
 
+  const onToggleSelectPress = () => {
+    setSelectedPress(!isSelectedPress);
+  };
+
+  const onDeleteAllPress = () => {
+    deleteAllDownloadDataFromLocal();
+    fetchDownloadedData();
+  };
+
   const renderSongItem = ({item, index}) => {
     return (
       <>
@@ -79,17 +94,26 @@ const OfflineDownloadGrid = ({navigation}) => {
             resizeMode="cover"
             source={{uri: item.posterImage}}
             style={styles.songItem}>
-            <View style={styles.overlay} />
+            <View
+              style={isSelectedPress ? styles.overlay : styles.overlayAlt}
+            />
             <Text style={styles.title}>{item.songName}</Text>
             <Text style={styles.artist}>{item.artistName}</Text>
-            <TouchableOpacity
-              onPress={onInsideMenuPress}
-              style={styles.insideMenuContainer}>
+            {isSelectedPress ? (
+              <TouchableOpacity
+                onPress={onInsideMenuPress}
+                style={styles.insideMenuContainer}>
+                <Image
+                  style={styles.insideMenu}
+                  source={require('../../icons/menu.png')}
+                />
+              </TouchableOpacity>
+            ) : (
               <Image
-                style={styles.insideMenu}
-                source={require('../../icons/menu.png')}
+                style={styles.insideMenuContainerAlt}
+                source={require('../../icons/greenIcon.png')}
               />
-            </TouchableOpacity>
+            )}
           </ImageBackground>
         </TouchableOpacity>
 
@@ -105,12 +129,29 @@ const OfflineDownloadGrid = ({navigation}) => {
     <View style={styles.container}>
       <View style={styles.wrapper}>
         <Text style={styles.heading}>Your Downloads</Text>
-        <TouchableOpacity>
-          <Image
-            style={{width: 25, height: 25}}
-            source={require('../../icons/menu.png')}
-          />
-        </TouchableOpacity>
+
+        {data?.length > 1 ? (
+          <View style={{flexDirection: 'row'}}>
+            {!isSelectedPress ? (
+              <TouchableOpacity onPress={onDeleteAllPress}>
+                <Image
+                  style={{width: 25, height: 25, marginRight: 20}}
+                  source={require('../../icons/delete.png')}
+                />
+              </TouchableOpacity>
+            ) : null}
+            <TouchableOpacity onPress={onToggleSelectPress}>
+              <Image
+                style={{width: 25, height: 25}}
+                source={
+                  isSelectedPress
+                    ? require('../../icons/unselected.png')
+                    : require('../../icons/aa.png')
+                }
+              />
+            </TouchableOpacity>
+          </View>
+        ) : null}
       </View>
       {data?.length > 0 ? (
         <FlatList
@@ -123,11 +164,14 @@ const OfflineDownloadGrid = ({navigation}) => {
           numColumns={3}
         />
       ) : (
-        <Image
-          resizeMode="contain"
-          style={{width: '100%', marginTop: -40}}
-          source={require('../../icons/noDownload.jpeg')}
-        />
+        <>
+          <Image
+            resizeMode="cover"
+            style={styles.downloadContainer}
+            source={require('../../icons/404-removebg.png')}
+          />
+          <Text style={styles.downloadText}>No download found</Text>
+        </>
       )}
     </View>
   );
@@ -183,6 +227,10 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.7)',
   },
+  overlayAlt: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.8)',
+  },
   playIcon: {
     width: 30,
     height: 30,
@@ -207,5 +255,26 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 8,
     right: 2,
+  },
+  insideMenuContainerAlt: {
+    position: 'absolute',
+    top: 8,
+    right: 2,
+    width: 20,
+    height: 20,
+  },
+  downloadContainer: {
+    width: '80%',
+    height: 200,
+    marginTop: -40,
+    alignSelf: 'center',
+    marginTop: 10,
+  },
+  downloadText: {
+    color: '#fff',
+    textAlign: 'center',
+    fontSize: 18,
+    marginVertical: 20,
+    fontWeight: '400',
   },
 });
