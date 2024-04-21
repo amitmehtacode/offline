@@ -105,6 +105,16 @@ const AudioPlayer = ({route, navigation}) => {
     );
   };
 
+  const getPosterImage = () => {
+    if (isAudio || isFromAudio) {
+      return posterImage;
+    } else {
+      return null;
+    }
+  };
+
+  const poster = getPosterImage();
+
   return (
     <>
       <Video
@@ -121,7 +131,7 @@ const AudioPlayer = ({route, navigation}) => {
         ignoreSilentSwitch={'ignore'}
         playWhenInactive={true}
         playInBackground={true}
-        poster={isAudio || isFromAudio ? posterImage : null}
+        poster={poster}
         posterResizeMode="cover"
       />
       <LinearGradient

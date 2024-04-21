@@ -11,7 +11,6 @@ import {VIDEO_DATA} from '../../data';
 
 const VideoGrid = ({navigation}) => {
   const handlePlay = (url, thumbnail, item) => {
-    console.log(`Playing song with ID ${navigation}`);
     navigation.navigate('PlayerScreen', {
       source: url,
       posterImage: thumbnail,
@@ -106,5 +105,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
-  box: {position: 'absolute', top: -10, left: 0}
+  box: {position: 'absolute', top: -10, left: 0},
 });

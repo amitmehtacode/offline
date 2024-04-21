@@ -7,6 +7,7 @@ import {
   View,
   Image,
   DeviceEventEmitter,
+  Platform,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {
@@ -16,6 +17,7 @@ import {
 } from '../../services/downloadService';
 import DeletionModal from '../../components/DeletionModal';
 import {useIsFocused} from '@react-navigation/core';
+import RNFetchBlob from 'rn-fetch-blob';
 
 const OfflineDownloadGrid = ({navigation}) => {
   const [data, setData] = useState([]);
@@ -24,6 +26,11 @@ const OfflineDownloadGrid = ({navigation}) => {
   const [isSelectedPress, setSelectedPress] = useState(false);
 
   const isFocused = useIsFocused();
+
+  var TrackFolder =
+    Platform.OS === 'android'
+      ? RNFetchBlob.fs.dirs.CacheDir
+      : RNFetchBlob.fs.dirs.DocumentDir;
 
   const fetchDownloadedData = () => {
     fetchDownloadedDataFromLocalDir(item => {
@@ -58,11 +65,17 @@ const OfflineDownloadGrid = ({navigation}) => {
   }, []);
 
   const handlePlay = (url, thumbnail, item) => {
+    const finalUrl = url.split('/').pop();
+    const offlineUrl = TrackFolder + '/' + finalUrl;
+
+    const thumbnailImage =
+      Platform.OS === 'android' ? 'file://' + thumbnail : thumbnail;
+
     navigation.navigate('PlayerScreen', {
-      source: url,
-      posterImage: thumbnail,
+      source: offlineUrl,
+      posterImage: thumbnailImage,
       data: item,
-      offline: true
+      offline: true,
     });
   };
 
@@ -72,7 +85,9 @@ const OfflineDownloadGrid = ({navigation}) => {
 
   const onDeletionPress = id => {
     deleteContentFromLocalDir(id);
-    fetchDownloadedData();
+    setTimeout(() => {
+      fetchDownloadedData();
+    }, 500);
   };
 
   const onToggleSelectPress = () => {
@@ -85,21 +100,26 @@ const OfflineDownloadGrid = ({navigation}) => {
   };
 
   const renderSongItem = ({item, index}) => {
+    const {source, posterImage, songName, artistName, id} = item;
+
+    const offlinePosterImageUrl =
+      Platform.OS === 'android' ? 'file://' + posterImage : posterImage;
+
     return (
       <>
         <TouchableOpacity
           key={index}
           style={styles.songItemContainer}
-          onPress={() => handlePlay(item.source, item.posterImage, item)}>
+          onPress={() => handlePlay(source, posterImage, item)}>
           <ImageBackground
             resizeMode="cover"
-            source={{uri: item.posterImage}}
+            source={{uri: offlinePosterImageUrl}}
             style={styles.songItem}>
             <View
               style={isSelectedPress ? styles.overlay : styles.overlayAlt}
             />
-            <Text style={styles.title}>{item.songName}</Text>
-            <Text style={styles.artist}>{item.artistName}</Text>
+            <Text style={styles.title}>{songName}</Text>
+            <Text style={styles.artist}>{artistName}</Text>
             {isSelectedPress ? (
               <TouchableOpacity
                 onPress={onInsideMenuPress}
@@ -121,7 +141,7 @@ const OfflineDownloadGrid = ({navigation}) => {
         <DeletionModal
           isModalVisible={isDeletionModalVisible}
           onClosePress={() => setDeletionModalVisible(false)}
-          onDeletionPress={() => onDeletionPress(item.id)}
+          onDeletionPress={() => onDeletionPress(id)}
         />
       </>
     );

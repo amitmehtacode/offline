@@ -12,19 +12,14 @@ export const sendDownloadedDataToLocalDir = async (
   posterImage,
   isAudio,
 ) => {
-  console.log('first', contentId, src, artistName, songName, posterImage);
-
   const {dirs} = RNFetchBlob.fs;
   const dirToSave = Platform.OS === 'ios' ? dirs.DocumentDir : dirs.CacheDir;
   const path = RNFetchBlob.fs.dirs.CacheDir + `/.file.json`;
 
   var offlineMusicPlayerUrl = '';
   var imageUrl = '';
-  var ownerUrl = '';
   var roundOffValue = 0;
   let getNewTime = new Date().getTime();
-  let uniqueId = Math.floor(JSON.stringify(Date.now() + Math.random()));
-  let customId = Math.floor(Math.random() * 100000);
 
   const commonConfig = {
     fileCache: true,
@@ -67,8 +62,8 @@ export const sendDownloadedDataToLocalDir = async (
       artistName: artistName,
       songName: songName,
       downloadDate: new Date(),
-      posterImage: posterImage,
-      isAudio: isAudio
+      posterImage: imageUrl,
+      isAudio: isAudio,
     };
 
     let offlinDonwloadList = [];
@@ -110,7 +105,6 @@ export const sendDownloadedDataToLocalDir = async (
         DeviceEventEmitter.emit('downloadProgress', params);
       })
       .then(async res => {
-        console.log('🚀 ~ res:', res);
         let downloadContents = {};
         if (Platform.OS === 'ios') {
           await RNFetchBlob.fs.writeFile(commonConfig.path, res.data, 'base64');
@@ -145,7 +139,6 @@ export const sendDownloadedDataToLocalDir = async (
       })
 
       .catch(err => {
-        console.log('error-----', err);
         callback('error');
         DeviceEventEmitter.emit('downloadError', true);
       });

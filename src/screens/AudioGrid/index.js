@@ -13,7 +13,6 @@ import {AUDIO_DATA} from '../../data';
 const AudioGrid = ({navigation}) => {
 
   const handlePlay = (url, thumbnail, item) => {
-    console.log("🚀 ~ handlePlay ~ url:", thumbnail)
     // Handle play action here
     navigation.navigate('PlayerScreen', {
       source: url,
