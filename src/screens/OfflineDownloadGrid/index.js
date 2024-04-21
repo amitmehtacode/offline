@@ -9,11 +9,19 @@ import {
   DeviceEventEmitter,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {fetchDownloadedDataFromLocalDir} from '../../services/downloadService';
+import {
+  deleteContentFromLocalDir,
+  fetchDownloadedDataFromLocalDir,
+} from '../../services/downloadService';
+import DeletionModal from '../../components/DeletionModal';
+import {useIsFocused} from '@react-navigation/core';
 
 const OfflineDownloadGrid = ({navigation}) => {
   const [data, setData] = useState([]);
   const [reRender, setReRender] = useState(false);
+  const [isDeletionModalVisible, setDeletionModalVisible] = useState(false);
+
+  const isFocused = useIsFocused();
 
   const fetchDownloadedData = () => {
     fetchDownloadedDataFromLocalDir(item => {
@@ -29,7 +37,7 @@ const OfflineDownloadGrid = ({navigation}) => {
 
   useEffect(() => {
     fetchDownloadedData();
-  }, [reRender]); // Add reRender to dependencies
+  }, [reRender, isFocused]);
 
   useEffect(() => {
     const downloadListenerStatus = DeviceEventEmitter.addListener(
@@ -44,9 +52,6 @@ const OfflineDownloadGrid = ({navigation}) => {
   }, []);
 
   const handlePlay = (url, thumbnail, item) => {
-    console.log('item---------', item);
-
-    // Handle play action here
     navigation.navigate('PlayerScreen', {
       source: url,
       posterImage: thumbnail,
@@ -54,36 +59,68 @@ const OfflineDownloadGrid = ({navigation}) => {
     });
   };
 
-  // Render item for FlatList
+  const onInsideMenuPress = () => {
+    setDeletionModalVisible(true);
+  };
+
+  const onDeletionPress = id => {
+    deleteContentFromLocalDir(id);
+    fetchDownloadedData();
+  };
+
   const renderSongItem = ({item, index}) => {
     return (
-      <TouchableOpacity
-        key={index}
-        style={styles.songItemContainer}
-        onPress={() => handlePlay(item.source, item.posterImage, item)}>
-        <ImageBackground
-          resizeMode="cover"
-          source={{uri: item.posterImage}}
-          style={styles.songItem}>
-          <View style={styles.overlay} />
-          <Text style={styles.title}>{item.songName}</Text>
-          <Text style={styles.artist}>{item.artistName}</Text>
-        </ImageBackground>
-      </TouchableOpacity>
+      <>
+        <TouchableOpacity
+          key={index}
+          style={styles.songItemContainer}
+          onPress={() => handlePlay(item.source, item.posterImage, item)}>
+          <ImageBackground
+            resizeMode="cover"
+            source={{uri: item.posterImage}}
+            style={styles.songItem}>
+            <View style={styles.overlay} />
+            <Text style={styles.title}>{item.songName}</Text>
+            <Text style={styles.artist}>{item.artistName}</Text>
+            <TouchableOpacity
+              onPress={onInsideMenuPress}
+              style={styles.insideMenuContainer}>
+              <Image
+                style={styles.insideMenu}
+                source={require('../../icons/menu.png')}
+              />
+            </TouchableOpacity>
+          </ImageBackground>
+        </TouchableOpacity>
+
+        <DeletionModal
+          isModalVisible={isDeletionModalVisible}
+          onClosePress={() => setDeletionModalVisible(false)}
+          onDeletionPress={() => onDeletionPress(item.id)}
+        />
+      </>
     );
   };
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Your Downloads</Text>
+      <View style={styles.wrapper}>
+        <Text style={styles.heading}>Your Downloads</Text>
+        <TouchableOpacity>
+          <Image
+            style={{width: 25, height: 25}}
+            source={require('../../icons/menu.png')}
+          />
+        </TouchableOpacity>
+      </View>
       {data?.length > 0 ? (
         <FlatList
           data={data}
           renderItem={renderSongItem}
           keyExtractor={item => item.id}
-          horizontal={true}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.flatlistContent}
           bounces={false}
+          numColumns={3}
         />
       ) : (
         <Image
@@ -110,15 +147,16 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   flatlistContent: {
-    alignItems: 'center',
     paddingBottom: 60,
+    alignItems: 'flex-start',
   },
   songItemContainer: {
     marginHorizontal: 5,
+    marginBottom: 10,
   },
   songItem: {
     width: 120,
-    height: 150,
+    height: 200,
     justifyContent: 'flex-end',
     alignItems: 'center',
     padding: 20,
@@ -143,16 +181,31 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.7)',
   },
   playIcon: {
     width: 30,
     height: 30,
-    tintColor: '#fff', // Adjust the play icon color as needed
+    tintColor: '#fff',
   },
   numberStyle: {
     fontSize: 70,
     color: '#fff',
     fontWeight: 'bold',
+  },
+  insideMenu: {
+    width: 20,
+    height: 20,
+  },
+  wrapper: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  insideMenuContainer: {
+    position: 'absolute',
+    top: 8,
+    right: 2,
   },
 });

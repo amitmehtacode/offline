@@ -29,6 +29,7 @@ export const sendDownloadedDataToLocalDir = async (
   artistName,
   songName,
   posterImage,
+  isAudio,
 ) => {
   console.log('first', contentId, src, artistName, songName, posterImage);
 
@@ -49,7 +50,9 @@ export const sendDownloadedDataToLocalDir = async (
     useDownloadManager: true,
     notification: true,
     title: songName,
-    path: `${dirToSave}/${getNewTime}.mp4`,
+    path: isAudio
+      ? `${dirToSave}/${getNewTime}.mp3`
+      : `${dirToSave}/${getNewTime}.mp4`,
     mediaScannable: true,
     description: 'file download',
   };
@@ -59,7 +62,7 @@ export const sendDownloadedDataToLocalDir = async (
       fileCache: commonConfig.fileCache,
       title: commonConfig.title,
       path: commonConfig.path,
-      appendExt: 'mp4',
+      appendExt: isAudio ? 'mp3' : 'mp4',
     },
     android: commonConfig,
   });
@@ -224,14 +227,7 @@ export const fetchDownloadedDataFromLocalDir = async (sendData = () => {}) => {
   } catch (e) {}
 };
 
-export const deleteContentFromLocalDir = async (
-  downloadedId,
-  downloadedContentType,
-  downloadedTrackTitle,
-  musicTypeValue,
-  musicProperty,
-  // eventObj
-) => {
+export const deleteContentFromLocalDir = async downloadedId => {
   let jsonObj = [];
   const MyPath = RNFetchBlob.fs.dirs.CacheDir + `/.file.json`;
   try {
@@ -240,46 +236,18 @@ export const deleteContentFromLocalDir = async (
     if (Array.isArray(localDownloads)) {
       jsonObj = localDownloads;
     }
-  } catch (e) {
-    let obj = {
-      type: CONSTANTS_ENUM.OFFLINE_DOWNLOAD_READ_FILE,
-      error: JSON.stringify(e),
-    };
-    registerAnalyticsEvent(
-      ANALYTICS_EVENTS.DELETE_SINGLE_DATA_FROM_LOCAL_FAILED,
-      obj,
-    );
-  }
+  } catch (e) {}
 
-  if (musicTypeValue === MUSIC_TYPE_BOTH && musicProperty) {
-    let flag = '';
-    const contentIdToFind = downloadedId;
-    jsonObj.map((item, index) => {
-      if (
-        item.id === contentIdToFind &&
-        item?.musicType === MUSIC_TYPE_BOTH &&
-        item?.userMusicProperty === musicProperty
-      ) {
-        flag = index;
-      }
-    });
-    jsonObj.splice(flag, 1);
-    newArrObj = jsonObj;
-    // jsonObj = jsonObj?.filter((item) => item.id === downloadedId && item?.musicType === MUSIC_TYPE_BOTH && item?.userMusicProperty === musicProperty);
-  } else if (
-    downloadedContentType === CONSTANTS_ENUM.TYPE_SINGLE &&
-    musicTypeValue !== MUSIC_TYPE_BOTH &&
-    downloadedId
-  ) {
-    jsonObj = jsonObj?.filter(obj => obj?.id !== downloadedId); // for single without music type --> both
-  } else if (
-    downloadedContentType === CONSTANTS_ENUM.TYPE_COURSE &&
-    downloadedTrackTitle
-  ) {
-    jsonObj = jsonObj?.filter(
-      obj => obj?.trackTitle !== downloadedTrackTitle, // for courses
-    );
-  }
+  let flag = '';
+  const contentIdToFind = downloadedId;
+  jsonObj.map((item, index) => {
+    if (item.id === contentIdToFind) {
+      flag = index;
+    }
+  });
+  jsonObj.splice(flag, 1);
+  // newArrObj = jsonObj;
+  // jsonObj = jsonObj?.filter((item) => item.id === downloadedId && item?.musicType === MUSIC_TYPE_BOTH && item?.userMusicProperty === musicProperty);
 
   await RNFetchBlob.fs
     .writeFile(MyPath, JSON.stringify(jsonObj), 'utf8')

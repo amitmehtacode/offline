@@ -39,7 +39,7 @@ const VideoGrid = ({navigation}) => {
   );
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>List of Videos</Text>
+      <Text style={styles.heading}>Trending Videos</Text>
       <FlatList
         data={VIDEO_DATA}
         renderItem={renderSongItem}

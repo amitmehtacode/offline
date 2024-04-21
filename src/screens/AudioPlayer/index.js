@@ -84,6 +84,7 @@ const AudioPlayer = ({route, navigation}) => {
       artistName,
       songName,
       posterImage,
+      isAudio
     );
   };
 
