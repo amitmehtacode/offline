@@ -373,7 +373,10 @@ const FastForwardComponent = () => {
 const BackWardComponent = () => {
   return (
     <TouchableOpacity style={styles.backContainer}>
-      <Image style={styles.fastIcon} source={require('../../icons/back.png')} />
+      <Image
+        style={styles.fastIcon}
+        source={require('../../icons/newBack.png')}
+      />
     </TouchableOpacity>
   );
 };
